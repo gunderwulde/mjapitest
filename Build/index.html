@@ -136,7 +136,11 @@
 
         /* LeChuck API Integration */
         function initializeLeChuckAPI() {
-            window.leChuckAPI = new LeChuckAPI({ id: '8806', unity: true});
+            if (typeof LeChuckAPIjs === 'undefined') {
+                console.warn("LeChuck API not loaded");
+                return;
+            }
+            window.leChuckAPI = new LeChuckAPIjs({ id: '8806'});
             window.leChuckAPI.events.onApiReady(function() {
                 console.log("LeChuck API Ready!");
                 // Enviar datos a Unity

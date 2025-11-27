@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>{{{ PRODUCT_NAME }}}</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://ssl.minijuegosgratis.com/lechuck/js/latest.js" id="LeChuckAPIjs"></script>
+    <script id="LeChuckAPIjs" src="https://ssl.minijuegosgratis.com/lechuck/js/latest.js" ></script>
 </head>
 
 <body>
@@ -150,13 +150,11 @@
 
         /* LeChuck API Integration */
         function initializeLeChuckAPI() {
-            /*
-            if (typeof LeChuckAPI === 'undefined') {
+            if (typeof LeChuckAPIjs === 'undefined') {
                 console.warn("LeChuck API not loaded");
                 return;
             }
-            */
-            window.leChuckAPI = new LeChuckAPI({ id: '8806'});
+            window.leChuckAPI = new LeChuckAPIjs({ id: '8806'});
             window.leChuckAPI.events.onApiReady(function() {
                 console.log("LeChuck API Ready!");
                 // Enviar datos a Unity
