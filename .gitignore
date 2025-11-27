@@ -4,3 +4,6 @@ Logs
 UserSettings
 .vsconfig
 *.sln
+.vs
+SoccerDudesBackend/Project/bin
+SoccerDudesBackend/Project/obj

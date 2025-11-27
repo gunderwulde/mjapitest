@@ -1,133 +1,221 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | mjapitest</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
+    <title>mjapitest</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="lechuck/js/lechuck-api.js" id="LeChuckAPIjs"></script>
+</head>
+
+<body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">mjapitest</div>
-      </div>
+        <canvas id="unity-canvas" tabindex="0"></canvas>
     </div>
+    <div id="loading-cover" style="display:none;">
+        <div id="unity-loading-bar">
+            <div id="unity-progress-bar-empty" style="display: none;">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+    </div>
+    <div id="unity-webgl-popup" class="unity-webgl-popup hidden">
+        <div class="unity-webgl-popup-content">
+            <label for="unity-webgl-popup-input">Popup fallback title</label>
+            <textarea id="unity-webgl-popup-input" maxlength="280" rows="5"
+                placeholder="Popup fallback placeholder..."></textarea>
+            <div class="unity-webgl-popup-buttons">
+                <button class="unity-webgl-popup-submit">Submit</button>
+                <button class="unity-webgl-popup-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="forte-payments-widget-container"></div>
+    <!-- GameStore -->
+    <script src="/games.list.js"></script>
+    <script src="/sdk.loader.js"></script>
     <script>
-      var canvas = document.querySelector("#unity-canvas");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            // Mobile device style: fill the whole browser client area with the game canvas:
+            const meta = document.createElement("meta");
+            meta.name = "viewport";
+            meta.content = "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+            document.getElementsByTagName("head")[0].appendChild(meta);
         }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
+
+        // Built-in variables
+        const LOADER_FILENAME = "Build.loader.js";
+        const DATA_FILENAME = "Build.data";
+        const FRAMEWORK_FILENAME = "Build.framework.js";
+        const WORKER_FILENAME = "";
+        const CODE_FILENAME = "Build.wasm";
+        const SYMBOLS_FILENAME = "";
+        const COMPANY_NAME = "DefaultCompany";
+        const PRODUCT_NAME = "mjapitest";
+        const PRODUCT_VERSION = "1.0";
+
+        // Selectors
+        const container = document.querySelector("#unity-container");
+        const canvas = document.querySelector("#unity-canvas");
+        const loadingCover = document.querySelector("#loading-cover");
+        const progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
+        const progressBarFull = document.querySelector("#unity-progress-bar-full");
+
+        // Game state
+        let unityInstance = null;
+        let leChuckAPI = null;
+
+        var localLoaderUrl = "Build/Build.loader.js";
+        const config = {
+            arguments: [],
+            dataUrl: "Build/Build.data",
+            frameworkUrl: "Build/Build.framework.js",
+            codeUrl: "Build/Build.wasm",
+            streamingAssetsUrl: "StreamingAssets",
+            companyName: "DefaultCompany",
+            productName: "mjapitest",
+            productVersion: "1.0"
+        };
+
+        loadingCover.style.display = "";
+
+        if (typeof PLAYgames === "object" && PLAYgames["monanimalmayhem"]) {
+            const remoteHostUrl = PLAYgames["monanimalmayhem"].url;
+            const loadConfigUrl = remoteHostUrl + "load-config.json";
+
+            fetchRemoteConfig(loadConfigUrl)
+                .then(loadConfig => {
+                    config.dataUrl = remoteHostUrl + loadConfig.dataUrl;
+                    config.frameworkUrl = remoteHostUrl + loadConfig.frameworkUrl;
+                    config.codeUrl = remoteHostUrl + loadConfig.codeUrl;
+                    config.streamingAssetsUrl = remoteHostUrl + "StreamingAssets";
+
+                    loadUnityInstance(remoteHostUrl + loadConfig.loaderUrl);
+                })
+                .catch(error => {
+                    console.error("Failed to load remote configuration:", error);
+                    loadUnityInstance(localLoaderUrl);
+                });
+        } else {
+            loadUnityInstance(localLoaderUrl);
         }
-        updateBannerVisibility();
-      }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Build.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/Build.data",
-        frameworkUrl: buildUrl + "/Build.framework.js",
-        codeUrl: buildUrl + "/Build.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "mjapitest",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
+        function fetchRemoteConfig(url) {
+            return new Promise((resolve, reject) => {
+                const cacheBuster = new Date().getTime();
+                const noCacheUrl = `${url}?_=${cacheBuster}`;
+                fetch(noCacheUrl)
+                    .then(response => response.json())
+                    .then(resolve)
+                    .catch(reject);
+            });
+        }
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
-
-      document.querySelector("#unity-loading-bar").style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
+        function loadUnityInstance(loaderUrl) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = loaderUrl;
+                script.onload = () => {
+                    createUnityInstance(canvas, config, (progress) => {
+                        progressBarEmpty.style.display = "";
+                        progressBarFull.style.width = `${100 * progress}%`;
+                    }).then((instance) => {
+                        unityInstance = instance;
+                        loadingCover.style.display = "none";
+                        initializeLeChuckAPI();
+                        resolve(instance);
+                    }).catch((message) => {
+                        alert(message);
+                        reject(message);
+                    });
                 };
+                document.body.appendChild(script);
+            });
+        }
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+        /* LeChuck API Integration */
+        function initializeLeChuckAPI() {
+            if (typeof LeChuckAPI === 'undefined') {
+                console.warn("LeChuck API not loaded");
+                return;
+            }
+            window.leChuckAPI = new LeChuckAPI({ id: '8806', unity: true});
+            window.leChuckAPI.events.onApiReady(function() {
+                console.log("LeChuck API Ready!");
+                // Enviar datos a Unity
+                if (unityInstance) {
+                    unityInstance.SendMessage("MiniJuegos", "OnAPIReady");
+                }
+            });
+        }
 
-      document.body.appendChild(script);
+        // Funciones para llamar desde Unity
+        function getLeChuckUserId() {
+            return window.leChuckAPI ? window.leChuckAPI.user.getId() : null;
+        }
 
+        function getLeChuckUserToken() {
+            return window.leChuckAPI ? window.leChuckAPI.user.getToken() : null;
+        }
+
+        function getLeChuckUserData() {
+            if (!window.leChuckAPI) return null;
+            return JSON.stringify({
+                userId: window.leChuckAPI.user.getId(),
+                userToken: window.leChuckAPI.user.getToken(),
+                userName: window.leChuckAPI.user.getUid(),
+                userLevel: window.leChuckAPI.user.getLevel(),
+                isGuest: window.leChuckAPI.user.isGuest(),
+                avatar: window.leChuckAPI.user.getAvatar()
+            });
+        }
+
+        /* Forte Payments Widget */
+        window.addEventListener("FortePaymentsBuyVdaSuccess", e => onForteWidgetCallback(true, "BUY_VDA", e.detail));
+        window.addEventListener("FortePaymentsBuyNftSuccess", e => onForteWidgetCallback(true, "BUY_NFT", e.detail));
+        window.addEventListener("FortePaymentsBuyNftMintSuccess", e => onForteWidgetCallback(true, "BUY_NFT_MINT", e.detail));
+        window.addEventListener("FortePaymentsWidgetClosed", e => onForteWidgetCallback(false, "", null));
+
+        function onForteWidgetCallback(success, type, details) {
+            unityInstance.SendMessage("PaymentCallbackReceiver", "ReceiveFortePaymentCallback", JSON.stringify({ success, type, details }));
+        }
+
+        function openForteWidget(paymentData) {
+            (function init() {
+                window.initFortePaymentsWidget
+                    ? window.initFortePaymentsWidget({
+                        containerId: "forte-payments-widget-container",
+                        data: JSON.parse(paymentData)
+                    })
+                    : setTimeout(init, 10);
+            })();
+        }
     </script>
-  </body>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.onEvent("viewportChanged", () => window.scrollTo(0, 0));
+        }
+    </script>
+    <script type="module" async src="https://dev-forte-payments-cdn.pti-dev.cloud/forte-payments-widget.js"></script>
+    <script>
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            const popup = document.getElementById("unity-webgl-popup");
+            const textarea = document.getElementById("unity-webgl-popup-input");
+            textarea.addEventListener("focus", () => {
+                popup.style.paddingBottom = "35vh";
+            });
+            textarea.addEventListener("blur", () => {
+                popup.style.paddingBottom = "0";
+            });
+        }
+    </script>
+    <!-- <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        eruda.init()
+    </script> -->
+</body>
+
 </html>

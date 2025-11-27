@@ -1,0 +1,170 @@
+html {
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+html, body {
+    height: 100%;
+}
+
+canvas {
+    display: block;
+}
+
+body {
+    margin: 0;
+}
+
+#unity-container {
+    width: 100%;
+    height: 100%;
+}
+
+#unity-canvas {
+    width: 100%;
+    height: 100%;
+    background: #7d7d7d center / cover;
+}
+
+#loading-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#unity-loading-bar {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#unity-logo {
+    text-align: center;
+}
+
+#unity-logo img {
+    max-width: 80%;
+}
+
+#unity-progress-bar-empty {
+    width: 80%;
+    height: 24px;
+    margin: 10px 20px 20px 10px;
+    text-align: left;
+    border: 1px solid white;
+    padding: 2px;
+}
+
+#unity-progress-bar-full {
+    width: 0;
+    height: 100%;
+    background: white;
+}
+
+.light #unity-progress-bar-empty {
+    border-color: black;
+}
+
+.light #unity-progress-bar-full {
+    background: black;
+}
+
+.unity-webgl-popup {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    transition: opacity 0.3s ease;
+}
+
+.unity-webgl-popup.hidden {
+    display: none;
+}
+
+.unity-webgl-popup-content {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 90%;
+    max-width: 375px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.unity-webgl-popup-content label {
+    display: block;
+    font-size: 17px;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.unity-webgl-popup-content textarea {
+    width: 100%;
+    resize: none;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-sizing: border-box;
+    background-color: #fafafa;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.unity-webgl-popup-content textarea:focus {
+    border-color: #007aff;
+    background-color: #fff;
+}
+
+.unity-webgl-popup-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.unity-webgl-popup-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.unity-webgl-popup-buttons button:first-child {
+    background-color: #007aff;
+    color: white;
+}
+
+.unity-webgl-popup-buttons button:first-child:hover {
+    background-color: #0066d1;
+}
+
+.unity-webgl-popup-buttons button:last-child {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.unity-webgl-popup-buttons button:last-child:hover {
+    background-color: #d5d5d5;
+}
