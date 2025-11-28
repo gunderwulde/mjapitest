@@ -31,7 +31,7 @@ public class MiniJuegos : MonoBehaviour
     async void Start() {
         // Initialize Unity Services.
         await UnityServices.InitializeAsync();
-//        AuthenticationService.Instance.ClearSessionToken();
+        AuthenticationService.Instance.ClearSessionToken();
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
         Debug.Log($"Backend Version: {await Version()}");
         await SignInUserWithLeChuck();
@@ -94,7 +94,8 @@ public class MiniJuegos : MonoBehaviour
     private static LeChuckUserData userData = null;
     // Initialize LeChuck API and get user data.
     public async Task InitializeLeChuck() {
-        initializeLeChuckAPI(gameObject.name, "OnAPIReady");
+        gameObject.name = "MiniJuegosCallbackTarget";
+        initializeLeChuckAPI("MiniJuegosCallbackTarget", "OnAPIReady");
         // Wait for MiniJuegos API to be ready and get user data.
         while (userData==null) await Task.Delay(100);
         Debug.Log($"Minijuegos: UserID: {userData.userId}, userName: {userData.userName}, userLevel: {userData.userLevel}. isGuest: {userData.isGuest}, avatar: {userData.avatar}");

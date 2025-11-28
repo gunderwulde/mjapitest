@@ -1,5 +1,6 @@
 mergeInto(LibraryManager.library, {
     initializeLeChuckAPI: function(callbackObject, callbackFunction) {
+    console.log("Future callback "+callbackObject+":"+callbackFunction);
         if (typeof leChuckAPI === 'undefined' ) {
             console.warn("LeChuck API not loaded");
             return;
