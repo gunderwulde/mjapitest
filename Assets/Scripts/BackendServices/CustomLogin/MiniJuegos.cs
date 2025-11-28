@@ -120,18 +120,19 @@ public class MiniJuegos : MonoBehaviour
 #endif
     private LeChuckUserData userData = null;
     // Initialize LeChuck API and get user data.
-    public async Task<bool> InitializeLeChuck() {
+    public async Task<bool> InitializeLeChuck(float timeout=10f) {
         userData = null;
         initializeLeChuckAPI();
         // Wait for MiniJuegos API to be ready and get user data.
-        float timeout = Time.time + 10f; // timeout in seconds
-        while (userData==null && timeout > Time.time)
-            await Task.Delay(100);
-        if(userData==null) {
+        float _timeout = Time.time + timeout; // timeout in seconds
+        while (userData == null && _timeout > Time.time){
+            await Task.Yield();
+        }
+        if (userData==null) {
             Debug.LogError($"[FPA] Minijuegos API did not respond in time.");
             return false;
         }
-        Debug.Log($"[FPA] Minijuegos: UserID: {userData.userId}, userName: {userData.userName}, userLevel: {userData.userLevel}. isGuest: {userData.isGuest}, avatar: {userData.avatar}");
+        Debug.Log($"[FPA] Minijuegos: UserID: {userData.userId}, userName: {userData.userName}");
         return true;
     }
     // Callback from MiniJuegos API when ready.

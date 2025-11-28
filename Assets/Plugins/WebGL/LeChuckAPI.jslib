@@ -18,7 +18,6 @@ mergeInto(LibraryManager.library, {
                     isGuest: user.isGuest(),
                     avatar: user.getAvatar()
                 };
-                console.log("[FPA] Calling callbacks");
                 unityInstance.SendMessage('CallbackTarget', 'OnAPIReady', JSON.stringify(userData) );
             }else{
                 console.error("[FPA] Unity Instance not found");
