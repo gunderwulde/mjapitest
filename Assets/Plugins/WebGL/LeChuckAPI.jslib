@@ -1,9 +1,10 @@
 mergeInto(LibraryManager.library, {
-    initializeLeChuckAPI: function(callbackObject, callbackFunction) {
+    initializeLeChuckAPI: function() {
         if (typeof leChuckAPI === 'undefined' ) {
-            console.warn("LeChuck API not loaded");
-            return;
+            console.error("[FPA] LeChuck API not loaded");
+            return false;
         }
+        console.log("[FPA] Initializcing LeChuckAPI");
         window.leChuckAPI = new LeChuckAPI({ id: '8806'});
         window.leChuckAPI.events.onApiReady(function() {
             // Enviar datos a Unity
@@ -17,9 +18,13 @@ mergeInto(LibraryManager.library, {
                     isGuest: user.isGuest(),
                     avatar: user.getAvatar()
                 };
-                unityInstance.SendMessage('CallbackTarget', 'OnAPIReady', JSON.stringify(userData));
-            }else
-                console.warn("Unity Instance not found");
+                console.log("[FPA] Calling callbacks");
+                unityInstance.SendMessage('CallbackTarget', 'OnAPIReady', JSON.stringify(userData) );
+            }else{
+                console.error("[FPA] Unity Instance not found");
+                return false;
+            }
         });
+        return true;
     },
 });

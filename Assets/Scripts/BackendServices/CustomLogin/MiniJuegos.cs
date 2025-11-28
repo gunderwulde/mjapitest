@@ -40,9 +40,9 @@ public class MiniJuegos : MonoBehaviour
         {
             // Handle authentication errors
             if (ex.ErrorCode == AuthenticationErrorCodes.InvalidSessionToken)
-                Debug.LogError("Deleted session token. Try again.");
+                Debug.LogError("[FPA] Deleted session token. Try again.");
             else
-                Debug.LogError("Sign in failed: " + ex.ErrorCode);
+                Debug.LogError("[FPA] Sign in failed: " + ex.ErrorCode);
             return;
         }
         catch (RequestFailedException ex)
@@ -51,9 +51,9 @@ public class MiniJuegos : MonoBehaviour
                 Debug.LogError($"Request failed: ({ex.ErrorCode}) {ex.Message}.");
             return;
         }
-        Debug.Log($"Backend Version: {await Version()}");
-        await SignInUserWithLeChuck();
-        Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
+        Debug.Log($"[FPA] Backend Version: {await Version()}");
+        var res = await SignInUserWithLeChuck();
+        Debug.Log($"[FPA] PlayerID: {AuthenticationService.Instance.PlayerId}");
     }
     // Backend functions.
     public static string ModuleName = "ExternalAuthModule";
@@ -71,10 +71,14 @@ public class MiniJuegos : MonoBehaviour
             new Dictionary<string, object> { { "userId", userId }, { "externalToken", externalToken }, { "autoLink", autoLink } }
         );
     }    
-    async Task SignInUserWithLeChuck() {
+    async Task<bool> SignInUserWithLeChuck() {
         var customID = AuthenticationService.Instance.PlayerInfo.GetCustomId();
-        if (customID != null) return; // Already signed in with CustomID.
-        await InitializeLeChuck();
+        if (customID != null) return true; // Already signed in with CustomID.
+        var res = await InitializeLeChuck();
+        if(!res) {
+            Debug.LogError("[FPA] Could not initialize LeChuck API.");
+            return false;
+        }
         try {
             // Check or link user account.
             var response = await AuthenticateWithExternalSystem(userData.userId, userData.userToken, true); // Use autolink.
@@ -88,18 +92,22 @@ public class MiniJuegos : MonoBehaviour
             // Compare error code to AuthenticationErrorCodes
             // Notify the player with the proper error message
             Debug.LogException(ex);
+            return false;
         }
         catch (RequestFailedException ex)
         {
             // Compare error code to CommonErrorCodes
             // Notify the player with the proper error message
             Debug.LogException(ex);
+            return false;
         }
         catch (System.Exception ex)
         {
             // Handle exceptions from your method call
             Debug.LogException(ex);
+            return false;
         }
+        return true;
     }
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
@@ -110,23 +118,31 @@ public class MiniJuegos : MonoBehaviour
         return true;
     }
 #endif
-    private static LeChuckUserData userData = null;
+    private LeChuckUserData userData = null;
     // Initialize LeChuck API and get user data.
-    public async Task InitializeLeChuck() {
-        
+    public async Task<bool> InitializeLeChuck() {
+        userData = null;
         initializeLeChuckAPI();
         // Wait for MiniJuegos API to be ready and get user data.
-        while (userData==null) await Task.Delay(100);
-        Debug.Log($"Minijuegos: UserID: {userData.userId}, userName: {userData.userName}, userLevel: {userData.userLevel}. isGuest: {userData.isGuest}, avatar: {userData.avatar}");
+        float timeout = Time.time + 10f; // timeout in seconds
+        while (userData==null && timeout > Time.time)
+            await Task.Delay(100);
+        if(userData==null) {
+            Debug.LogError($"[FPA] Minijuegos API did not respond in time.");
+            return false;
+        }
+        Debug.Log($"[FPA] Minijuegos: UserID: {userData.userId}, userName: {userData.userName}, userLevel: {userData.userLevel}. isGuest: {userData.isGuest}, avatar: {userData.avatar}");
+        return true;
     }
     // Callback from MiniJuegos API when ready.
     public void OnAPIReady(string jsonData) {
+        Debug.Log($"[FPA] Minijuegos API is ready.");
         try {
             userData = JsonUtility.FromJson<LeChuckUserData>(jsonData);
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Error parsing LeChuck user data: {ex.Message}");
+            Debug.LogError($"[FPA] Error parsing LeChuck user data: {ex.Message}");
         }
     }
 }
