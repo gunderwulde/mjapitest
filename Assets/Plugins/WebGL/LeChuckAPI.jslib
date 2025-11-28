@@ -18,6 +18,7 @@ mergeInto(LibraryManager.library, {
                     isGuest: user.isGuest(),
                     avatar: user.getAvatar()
                 };
+                console.log("SendMessage "+callbackObject+" "+callbackFunction);
                 window.unityInstance.SendMessage(callbackObject, callbackFunction, JSON.stringify(userData));
             }else
                 console.warn("Unity Instance not found");
