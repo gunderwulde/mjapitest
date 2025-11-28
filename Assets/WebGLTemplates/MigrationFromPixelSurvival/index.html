@@ -135,8 +135,7 @@
                         progressBarEmpty.style.display = "";
                         progressBarFull.style.width = `${100 * progress}%`;
                     }).then((instance) => {
-                        console.log("Asign unityInstance");
-                        window.unityInstance = unityInstance = instance;
+                        unityInstance = instance;
                         loadingCover.style.display = "none";
                         resolve(instance);
                     }).catch((message) => {
