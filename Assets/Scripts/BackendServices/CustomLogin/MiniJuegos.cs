@@ -20,24 +20,43 @@ public class MiniJuegos : MonoBehaviour
         public string userName = "USE_NAME";
         public int userLevel = 1;
         public bool isGuest = false;
-        public string avatar ="http://";
+        public string avatar = "http://";
     }
     void Awake() {
+        gameObject.name = "CallbackTarget";
 #if !UNITY_WEBGL || UNITY_EDITOR
         OnAPIReady(null);
 #endif
     }
-    public static string ModuleName = "ExternalAuthModule";
     async void Start() {
         // Initialize Unity Services.
         await UnityServices.InitializeAsync();
-        AuthenticationService.Instance.ClearSessionToken();
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        //        
+        try
+        {
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+        catch (AuthenticationException ex)
+        {
+            // Handle authentication errors
+            if (ex.ErrorCode == AuthenticationErrorCodes.InvalidSessionToken)
+                Debug.LogError("Deleted session token. Try again.");
+            else
+                Debug.LogError("Sign in failed: " + ex.ErrorCode);
+            return;
+        }
+        catch (RequestFailedException ex)
+        {
+            // Handle network or other request errors
+                Debug.LogError($"Request failed: ({ex.ErrorCode}) {ex.Message}.");
+            return;
+        }
         Debug.Log($"Backend Version: {await Version()}");
         await SignInUserWithLeChuck();
         Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
     }
     // Backend functions.
+    public static string ModuleName = "ExternalAuthModule";
     async Task<string> Version() => await CloudCodeService.Instance.CallModuleEndpointAsync<string>(ModuleName,"Version");
     [System.Serializable]
     public class UnityAuthTokens {
@@ -84,18 +103,18 @@ public class MiniJuegos : MonoBehaviour
     }
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
-    private static extern bool initializeLeChuckAPI(string callbackObject, string callbackFunction);
+    private static extern bool initializeLeChuckAPI();
 #else
-    private static bool initializeLeChuckAPI(string callbackObject, string callbackFunction) {
-        GameObject.Find(callbackObject).SendMessage(callbackFunction, "{}") ;
+    private static bool initializeLeChuckAPI() {
+        GameObject.Find("CallbackTarget").SendMessage("OnAPIReady", "{}") ;
         return true;
     }
 #endif
     private static LeChuckUserData userData = null;
     // Initialize LeChuck API and get user data.
     public async Task InitializeLeChuck() {
-        gameObject.name = "MiniJuegosCallbackTarget";
-        initializeLeChuckAPI("MiniJuegosCallbackTarget", "OnAPIReady");
+        
+        initializeLeChuckAPI();
         // Wait for MiniJuegos API to be ready and get user data.
         while (userData==null) await Task.Delay(100);
         Debug.Log($"Minijuegos: UserID: {userData.userId}, userName: {userData.userName}, userLevel: {userData.userLevel}. isGuest: {userData.isGuest}, avatar: {userData.avatar}");

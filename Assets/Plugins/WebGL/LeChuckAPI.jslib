@@ -7,7 +7,6 @@ mergeInto(LibraryManager.library, {
         }
         window.leChuckAPI = new LeChuckAPI({ id: '8806'});
         window.leChuckAPI.events.onApiReady(function() {
-            console.log("LeChuck API Ready!");
             // Enviar datos a Unity
             if (window.unityInstance){
                 const user = window.leChuckAPI.user;
@@ -19,8 +18,7 @@ mergeInto(LibraryManager.library, {
                     isGuest: user.isGuest(),
                     avatar: user.getAvatar()
                 };
-                console.log("SendMessage "+callbackObject+" "+callbackFunction);
-                window.unityInstance.SendMessage(callbackObject, callbackFunction, JSON.stringify(userData));
+                window.unityInstance.SendMessage("CallbackTarget", "OnAPIReady", JSON.stringify(userData));
             }else
                 console.warn("Unity Instance not found");
         });
