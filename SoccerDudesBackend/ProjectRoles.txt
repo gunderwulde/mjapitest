@@ -1,0 +1,4 @@
++ LiveOps
+	+ Authentication Admin (delete player)
+	+ Authentication Editor	(delete player)
+	+ Player Authentication Token Issuer (Stateless Token generation)

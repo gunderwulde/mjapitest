@@ -123,7 +123,7 @@
                     }).then((instance) => {
                         unityInstance = instance;
                         loadingCover.style.display = "none";
-                        initializeLeChuckAPI();
+                        //initializeLeChuckAPI();
                         resolve(instance);
                     }).catch((message) => {
                         alert(message);
@@ -134,46 +134,8 @@
             });
         }
 
-        /* LeChuck API Integration */
-        function initializeLeChuckAPI() {
-            /*
-            if (typeof LeChuckAPIjs === 'undefined') {
-                console.warn("LeChuck API not loaded");
-                return;
-            }
-            */
-            window.leChuckAPI = new LeChuckAPI({ id: '8806'});
-            window.leChuckAPI.events.onApiReady(function() {
-                console.log("LeChuck API Ready!");
-                // Enviar datos a Unity
-                if (unityInstance) {
-                    unityInstance.SendMessage("CustomLogin", "OnAPIReady");
-                }
-            });
-        }
-
-        // Funciones para llamar desde Unity
-        function getLeChuckUserId() {
-            return window.leChuckAPI ? window.leChuckAPI.user.getId() : null;
-        }
-
-        function getLeChuckUserToken() {
-            return window.leChuckAPI ? window.leChuckAPI.user.getToken() : null;
-        }
-
-        function getLeChuckUserData() {
-            if (!window.leChuckAPI) return null;
-            return JSON.stringify({
-                userId: window.leChuckAPI.user.getId(),
-                userToken: window.leChuckAPI.user.getToken(),
-                userName: window.leChuckAPI.user.getUid(),
-                userLevel: window.leChuckAPI.user.getLevel(),
-                isGuest: window.leChuckAPI.user.isGuest(),
-                avatar: window.leChuckAPI.user.getAvatar()
-            });
-        }
-
-        /* Forte Payments Widget */
+        /*
+        // Forte Payments Widget
         window.addEventListener("FortePaymentsBuyVdaSuccess", e => onForteWidgetCallback(true, "BUY_VDA", e.detail));
         window.addEventListener("FortePaymentsBuyNftSuccess", e => onForteWidgetCallback(true, "BUY_NFT", e.detail));
         window.addEventListener("FortePaymentsBuyNftMintSuccess", e => onForteWidgetCallback(true, "BUY_NFT_MINT", e.detail));
@@ -193,7 +155,10 @@
                     : setTimeout(init, 10);
             })();
         }
+        */    
     </script>
+
+    <!-- Comented by FPA.
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         if (window.Telegram && window.Telegram.WebApp) {
@@ -214,6 +179,8 @@
             });
         }
     </script>
+    -->
+
     <!-- <script src="//cdn.jsdelivr.net/npm/eruda"></script>
     <script>
         eruda.init()
