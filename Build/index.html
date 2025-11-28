@@ -63,6 +63,7 @@
         const progressBarFull = document.querySelector("#unity-progress-bar-full");
 
         // Game state
+        let unityInstance = null;
         let leChuckAPI = null;
 
         var localLoaderUrl = "Build/{{{ LOADER_FILENAME }}}";
@@ -134,7 +135,8 @@
                         progressBarEmpty.style.display = "";
                         progressBarFull.style.width = `${100 * progress}%`;
                     }).then((instance) => {
-                        window.unityInstance = instance;
+                        console.log("Asign unityInstance");
+                        window.unityInstance = unityInstance = instance;
                         loadingCover.style.display = "none";
                         resolve(instance);
                     }).catch((message) => {
@@ -154,7 +156,7 @@
         window.addEventListener("FortePaymentsWidgetClosed", e => onForteWidgetCallback(false, "", null));
 
         function onForteWidgetCallback(success, type, details) {
-            window.unityInstance.SendMessage("PaymentCallbackReceiver", "ReceiveFortePaymentCallback", JSON.stringify({ success, type, details }));
+            unityInstance.SendMessage("PaymentCallbackReceiver", "ReceiveFortePaymentCallback", JSON.stringify({ success, type, details }));
         }
 
         function openForteWidget(paymentData) {
