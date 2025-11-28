@@ -135,9 +135,9 @@
                         progressBarEmpty.style.display = "";
                         progressBarFull.style.width = `${100 * progress}%`;
                     }).then((instance) => {
-                        unityInstance = instance;
+                        console.log("Asign unityInstance");
+                        window.unityInstance = unityInstance = instance;
                         loadingCover.style.display = "none";
-                        //initializeLeChuckAPI();
                         resolve(instance);
                     }).catch((message) => {
                         alert(message);

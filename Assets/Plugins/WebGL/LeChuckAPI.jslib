@@ -9,13 +9,14 @@ mergeInto(LibraryManager.library, {
             console.log("LeChuck API Ready!");
             // Enviar datos a Unity
             if (window.unityInstance){
+                const user = window.leChuckAPI.user;
                 const userData = {
-                    userId: leChuckAPI.user.getId(),
-                    userToken: leChuckAPI.user.getToken(),
-                    userName: leChuckAPI.user.getUid(),
-                    userLevel: leChuckAPI.user.getLevel(),
-                    isGuest: leChuckAPI.user.isGuest(),
-                    avatar: leChuckAPI.user.getAvatar()
+                    userId: user.getId(),
+                    userToken: user.getToken(),
+                    userName: user.getUid(),
+                    userLevel: user.getLevel(),
+                    isGuest: user.isGuest(),
+                    avatar: user.getAvatar()
                 };
                 window.unityInstance.SendMessage(callbackObject, callbackFunction, JSON.stringify(userData));
             }else
