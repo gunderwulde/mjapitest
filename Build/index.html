@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>{{{ PRODUCT_NAME }}}</title>
+    <title>mjapitest</title>
     <link rel="stylesheet" href="style.css">
     <script id="LeChuckAPIjs" src="https://ssl.minijuegosgratis.com/lechuck/js/latest.js" ></script>
 </head>
@@ -45,15 +45,15 @@
         }
 
         // Built-in variables
-        const LOADER_FILENAME = "{{{ LOADER_FILENAME }}}";
-        const DATA_FILENAME = "{{{ DATA_FILENAME }}}";
-        const FRAMEWORK_FILENAME = "{{{ FRAMEWORK_FILENAME }}}";
-        const WORKER_FILENAME = "{{{ WORKER_FILENAME }}}";
-        const CODE_FILENAME = "{{{ CODE_FILENAME }}}";
-        const SYMBOLS_FILENAME = "{{{ SYMBOLS_FILENAME }}}";
-        const COMPANY_NAME = {{{ JSON.stringify(COMPANY_NAME) }}};
-        const PRODUCT_NAME = {{{ JSON.stringify(PRODUCT_NAME) }}};
-        const PRODUCT_VERSION = {{{ JSON.stringify(PRODUCT_VERSION) }}};
+        const LOADER_FILENAME = "Build.loader.js";
+        const DATA_FILENAME = "Build.data";
+        const FRAMEWORK_FILENAME = "Build.framework.js";
+        const WORKER_FILENAME = "";
+        const CODE_FILENAME = "Build.wasm";
+        const SYMBOLS_FILENAME = "";
+        const COMPANY_NAME = "DefaultCompany";
+        const PRODUCT_NAME = "mjapitest";
+        const PRODUCT_VERSION = "1.0";
 
         // Selectors
         const container = document.querySelector("#unity-container");
@@ -66,24 +66,16 @@
         let unityInstance = null;
         let leChuckAPI = null;
 
-        var localLoaderUrl = "Build/{{{ LOADER_FILENAME }}}";
+        var localLoaderUrl = "Build/Build.loader.js";
         const config = {
             arguments: [],
-            dataUrl: "Build/{{{ DATA_FILENAME }}}",
-            frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
-#if USE_THREADS
-            workerUrl: "Build/{{{ WORKER_FILENAME }}}",
-#endif
-#if USE_WASM
-            codeUrl: "Build/{{{ CODE_FILENAME }}}",
-#endif
-#if SYMBOLS_FILENAME
-            symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
-#endif
+            dataUrl: "Build/Build.data",
+            frameworkUrl: "Build/Build.framework.js",
+            codeUrl: "Build/Build.wasm",
             streamingAssetsUrl: "StreamingAssets",
-            companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
-            productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
-            productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}}
+            companyName: "DefaultCompany",
+            productName: "mjapitest",
+            productVersion: "1.0"
         };
 
         loadingCover.style.display = "";
@@ -97,12 +89,6 @@
                     config.dataUrl = remoteHostUrl + loadConfig.dataUrl;
                     config.frameworkUrl = remoteHostUrl + loadConfig.frameworkUrl;
                     config.codeUrl = remoteHostUrl + loadConfig.codeUrl;
-#if MEMORY_FILENAME
-                    config.memoryUrl = remoteHostUrl + loadConfig.memoryUrl;
-#endif
-#if SYMBOLS_FILENAME
-                    config.symbolsUrl = remoteHostUrl + loadConfig.symbolsUrl;
-#endif
                     config.streamingAssetsUrl = remoteHostUrl + "StreamingAssets";
 
                     loadUnityInstance(remoteHostUrl + loadConfig.loaderUrl);
